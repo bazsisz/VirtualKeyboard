@@ -1,0 +1,162 @@
+﻿<mah:MetroWindow  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                  x:Class="VirtualKeyboard.WpfInputKeyboard"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:local="clr-namespace:VirtualKeyboard" 
+                  xmlns:localconverters="clr-namespace:VirtualKeyboard.Converters" 
+                  xmlns:IconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                  mc:Ignorable="d"
+                  Title="{Binding FieldTitle}" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!--#region InputTextBox-->
+        <TextBox Margin="10"
+                 AcceptsReturn="True"
+                 Height="80"
+                 Text="{Binding Text}"
+                 Name="textBox"
+                 PreviewMouseLeftButtonDown="CaretPosSelected"
+                 VerticalScrollBarVisibility="Auto"
+                 />
+        <!--#endregion-->
+
+        <!--#region Keyboard-->
+        <DockPanel Grid.Row="1">
+            <Grid DockPanel.Dock="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ToggleButton Grid.Column="0"
+                        Margin="3"
+                        Content="Ctrl"
+                        IsChecked="{Binding IsControlActive}"
+                        Click="Control_Click"/>
+                <ToggleButton Grid.Column="1"
+                              x:Name="specialCharsToogleButton"
+                              Margin="3"
+                              Content="!#1"
+                              Click="SpeacialChars_Click"/>
+                <Button Grid.Column="2"
+                        Margin="3"
+                        Content="Space"
+                        Click="OnSpace_Click"/>
+                <Button Grid.Column="3"
+                        Margin="3"
+                        Content="&lt;"
+                        Click="DecresaseCaretPos_Click"/>
+                <Button Grid.Column="4"
+                        Margin="3"
+                        Content="&gt;"
+                        Click="IncreaseCaretPos_Click"/>
+            </Grid>
+            <StackPanel DockPanel.Dock="Left"
+                        VerticalAlignment="Bottom">
+                <ToggleButton IsThreeState="True"
+                              Margin="3"
+                              IsChecked="{Binding ShiftManager.CurrentCasing, Converter={localconverters:CasingToNullableBoolConverter}}">
+                    <ToggleButton.Content>
+                        <IconPacks:PackIconBootstrapIcons Kind="ShiftFill"
+                                                          Height="25"
+                                                          Width="25"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right"
+                        VerticalAlignment="Bottom">
+                <Button Margin="3"
+                        Content="Del"
+                        Click="Delete_Click"/>
+                <Button Margin="3"
+                        Content="Back"
+                        Click="BackSpace_Click"/>
+                <ToggleButton IsThreeState="True"
+                              Margin="3"
+                              IsChecked="{Binding ShiftManager.CurrentCasing, Converter={localconverters:CasingToNullableBoolConverter}}">
+                    <ToggleButton.Content>
+                        <IconPacks:PackIconBootstrapIcons Kind="ShiftFill"
+                                                          Height="25"
+                                                          Width="25"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
+            </StackPanel>
+            <UniformGrid>
+                <ItemsControl  ItemsSource="{Binding KeyChars}"
+                               x:Name="KeysRows"
+                               VerticalAlignment="Stretch">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+
+                            <ItemsControl  ItemsSource="{Binding}"
+                                           Margin="5">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+
+                                        <Button Margin="3"
+                                                FontSize="20"
+                                                Click="Character_Click">
+                                            <Button.Content>
+                                                <MultiBinding Converter="{localconverters:CharacterCasingConverter}">
+                                                    <Binding Path="."/>
+                                                    <Binding Path="ShiftManager" RelativeSource="{RelativeSource AncestorType=mah:MetroWindow}"/>
+                                                </MultiBinding>
+                                            </Button.Content>
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{localconverters:CtrlPressedButtonEnableConverter}">
+                                                    <Binding Path="."/>
+                                                    <Binding Path="IsControlActive" RelativeSource="{RelativeSource AncestorType=mah:MetroWindow}"/>
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1"></UniformGrid>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </UniformGrid>
+        </DockPanel>
+        <!--#endregion-->
+        
+        
+        <!--#region Ok/Cancel-->
+        <Grid Grid.Row="2"
+              Margin="15 15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="OK"
+                    Grid.Column="0"
+                    Width="150"
+                    Click="Ok_Click"/>
+            <Button Content="Cancel"
+                    Grid.Column="1"
+                    Width="150"
+                    Click="Cancel_Click"/>
+        </Grid>
+        <!--#endregion-->
+
+    </Grid>
+</mah:MetroWindow>
