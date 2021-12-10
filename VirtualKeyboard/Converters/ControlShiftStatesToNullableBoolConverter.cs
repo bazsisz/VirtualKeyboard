@@ -1,56 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Markup;
-using static VirtualKeyboard.ShiftManager;
+using static VirtualKeyboard.WpfInputKeyboard;
 
 namespace VirtualKeyboard.Converters
 {
-    [ValueConversion(typeof(Casing), typeof(bool?))]
-    class CasingToNullableBoolConverter : MarkupExtension, IValueConverter
+    [ValueConversion(typeof(ControlShiftStates), typeof(bool?))]
+    public class ControlShiftStatesToNullableBoolConverter : MarkupExtension, IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (targetType == typeof(bool?) &&
-                value is Casing casing) 
+            if ((targetType == typeof(bool?) ||
+                targetType == typeof(object)) &&
+                value is ControlShiftStates casing) 
             {
                 switch (casing)
                 {
-                    case Casing.LowerCase:
+                    case ControlShiftStates.NotActive:
                         return null;
 
-                    case Casing.FirstLetterUpperCase:
+                    case ControlShiftStates.ActiveUntilButtonPressed:
                         return false;
 
                     default:
                         return true;
                 }
             }
-            throw new Exception("Error in CasingToNullableBoolConverter");
+            throw new Exception("Error in ControlShiftStatesToNullableBoolConverter");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (targetType == typeof(Casing))
+            if (targetType == typeof(ControlShiftStates))
             {
                 bool? shiftState = (bool?)value;
                 switch (shiftState)
                 {
                     case null:
-                        return Casing.LowerCase;
+                        return ControlShiftStates.NotActive;
 
                     case false:
-                        return Casing.FirstLetterUpperCase;
+                        return ControlShiftStates.ActiveUntilButtonPressed;
 
                     default:
-                        return Casing.UpperCase;
+                        return ControlShiftStates.AlwaysActive;
                 }
             }
-            throw new Exception("Error in CasingToNullableBoolConverter");
+            throw new Exception("Error in ControlShiftStatesToNullableBoolConverter");
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

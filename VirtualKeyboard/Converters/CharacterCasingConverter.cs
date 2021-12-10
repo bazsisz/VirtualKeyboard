@@ -19,7 +19,7 @@ namespace VirtualKeyboard.Converters
                (values[0] is char character) &&
                (values[1] is ShiftManager shiftManager))
             {
-                return shiftManager.ApplyCasing(character, false);
+                return shiftManager.ApplyCasing(character, false).ToString();
             }
             return DependencyProperty.UnsetValue;
         }

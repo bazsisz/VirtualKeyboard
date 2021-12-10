@@ -31,23 +31,5 @@ namespace VirtualKeyboard
             Title = "Something";
             Keyboard = new Hungarian_Keyboard();
         }
-
-        //private void OnTextBoxSelected()
-        //{
-        //    InputKeyboardViewmodel viewmodel = new InputKeyboardViewmodel(Keyboard, InputText) 
-        //    { 
-        //        Title = Title,
-        //    };
-        //    WpfInputKeyboard dialog = new WpfInputKeyboard()
-        //    {
-        //        DataContext = viewmodel,
-        //        //TextBox = textbox,
-        //    };
-        //    if ((bool)dialog.ShowDialog())
-        //    {
-        //        InputText = viewmodel.InputText;
-        //    }
-
-        //}
     }
 }

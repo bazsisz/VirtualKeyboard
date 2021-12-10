@@ -1,32 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VirtualKeyboard
 {
 
     public class ShiftManager : INotifyPropertyChanged
     {
-        public enum Casing
+        private ControlShiftStates _currentShiftState;
+        public ControlShiftStates CurrentShiftState
         {
-            LowerCase,
-            FirstLetterUpperCase,
-            UpperCase
-        }
-
-        private Casing _currentCasing;
-        public Casing CurrentCasing
-        {
-            get => _currentCasing;
+            get => _currentShiftState;
             set
             {
-                if (_currentCasing != value)
+                if (_currentShiftState != value)
                 {
-                    _currentCasing = value;
+                    _currentShiftState = value;
                     OnPropertyChanged();
 
                 }
@@ -35,13 +24,13 @@ namespace VirtualKeyboard
 
         public char ApplyCasing(char character, bool resetFirstLetterUpperCaseToLowerCase)
         {
-            switch (_currentCasing)
+            switch (_currentShiftState)
             {
-                case Casing.LowerCase:
+                case ControlShiftStates.NotActive:
                     return char.ToLower(character);
 
-                case Casing.FirstLetterUpperCase:
-                    CurrentCasing = resetFirstLetterUpperCaseToLowerCase ? Casing.LowerCase : _currentCasing;
+                case ControlShiftStates.ActiveUntilButtonPressed:
+                    CurrentShiftState = resetFirstLetterUpperCaseToLowerCase ? ControlShiftStates.NotActive : _currentShiftState;
                     return char.ToUpper(character);
 
                 default:

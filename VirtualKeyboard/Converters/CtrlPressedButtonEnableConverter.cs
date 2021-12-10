@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
@@ -15,16 +11,18 @@ namespace VirtualKeyboard.Converters
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if ((targetType == typeof(bool)) &&
-               values.Length == 2 &&
-               (values[0] is char character) &&
-               (values[1] is bool isCtrlActive))
+               values.Length == 2)
             {
-                if (isCtrlActive)
+                bool? isCtrlActive = values[1] as bool?;
+                string str = values[0].ToString();
+                if (isCtrlActive != null)
                 {
-                    if (character == 'a' || 
-                        character == 'c' ||
-                        character == 'x' ||
-                        character == 'v')
+                    if (str == "a" ||
+                        str == "c" ||
+                        str == "x" ||
+                        str == "v" ||
+                        str == "<" ||
+                        str == ">")
                     {
                         return true;
                     }

@@ -1,63 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using VirtualKeyboard.Combinations;
 
 namespace VirtualKeyboard
 {
     public class ControlManager : INotifyPropertyChanged
     {
-        private bool _isControlActive;
-        public bool IsControlActive 
+        private ControlShiftStates _currentCtrlState;
+        public ControlShiftStates CurrentCtrlState
         {
-            get => _isControlActive;
+            get { return _currentCtrlState; }
             set
             {
-                if (_isControlActive != value)
+                if (_currentCtrlState != value)
                 {
-                    _isControlActive = value;
+                    _currentCtrlState = value;
                     OnPropertyChanged();
 
                 }
             }
         }
 
-        public string Selection { get; set; }
-
-        public TextBox TextBox { get; set; }
-
-
-
-        public ControlManager()
+        public bool IsControlActive
         {
-            Selection = "";
+            get => CurrentCtrlState == ControlShiftStates.ActiveUntilButtonPressed || CurrentCtrlState == ControlShiftStates.AlwaysActive;
         }
 
-        public void CombinationPressed(ICombination combination)
+        public bool IsCtrlActiveButtonPressed()
         {
-            combination.HandleComninationPressed();
+            bool isActive = IsControlActive;
+            CurrentCtrlState = CurrentCtrlState == ControlShiftStates.ActiveUntilButtonPressed ? ControlShiftStates.NotActive : CurrentCtrlState;
+            return isActive;
         }
-
-        //public void CombinationPressed(char character)
-        //{
-        //    switch (character) 
-        //    {
-        //        case 'a':
-        //            CombinationPressed(new CtrlACombination(this));
-        //            break;
-        //        case '<':
-        //            CombinationPressed(new CtrlLeftSelectCombination(this));
-        //            break;
-        //    }
-        //}
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
+
             try
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

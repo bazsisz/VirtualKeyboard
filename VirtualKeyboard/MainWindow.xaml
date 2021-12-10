@@ -11,27 +11,21 @@
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
+            <TextBlock Text="{Binding Title ,FallbackValue= Something}"
+                       VerticalAlignment="Center"
+                       Grid.Row="0"
+                       Grid.Column="0"/>
             <local:VirtualKeyboardTextBoxControl Grid.Row="0"
-                                                 Grid.ColumnSpan="3"
+                                                 Grid.Column="1"
                                                  Text="{Binding InputText}"
                                                  Title="{Binding Title}"
                                                  CharSet="HU"/>
-
-            <TextBox Margin="10 10"
-                     Grid.Column="1"
-                     Grid.Row="1"
-                     AcceptsReturn="true">
-
-            </TextBox>
         </Grid>
     </StackPanel>
 </mah:MetroWindow>

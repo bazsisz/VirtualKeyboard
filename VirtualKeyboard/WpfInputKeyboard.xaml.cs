@@ -2,46 +2,33 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using VirtualKeyboard.Combinations;
 
 namespace VirtualKeyboard
 {
+    public enum ControlShiftStates
+    {
+        NotActive,
+        ActiveUntilButtonPressed,
+        AlwaysActive
+    }
+
     /// <summary>
     /// Interaction logic for WpfInputKeyboard.xaml
     /// </summary>
-    public partial class WpfInputKeyboard : MetroWindow, INotifyPropertyChanged
+    internal partial class WpfInputKeyboard : MetroWindow, INotifyPropertyChanged
     {
+
         private Keyboard_Base _charSetKeyboard;
 
         public Selection TextSelected { get; set; }
 
         public string CopiedText { get; set; }
-
-        private bool _isControlActive;
-        public bool IsControlActive
-        {
-            get => _isControlActive;
-            set
-            {
-                if (_isControlActive != value)
-                {
-                    _isControlActive = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
 
         private string _text;
         public string Text
@@ -71,6 +58,37 @@ namespace VirtualKeyboard
             }
         }
 
+        private double _bottomButtonHeight;
+        public double BottomButtonHeight
+        {
+            get => _bottomButtonHeight;
+            set
+            {
+                if (_bottomButtonHeight != value)
+                {
+                    _bottomButtonHeight = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isSpeacialCharsChecked;
+        public bool IsSpeacialCharsChecked
+        {
+            get => _isSpeacialCharsChecked;
+            set
+            {
+                if (_isSpeacialCharsChecked != value)
+                {
+                    _isSpeacialCharsChecked = value;
+                    KeyChars = _isSpeacialCharsChecked ? _charSetKeyboard.SpeacialCharacters.CharactersListByRow : _charSetKeyboard.Alphabet.CharactersListByRow;
+                    specialCharsText.Text = _isSpeacialCharsChecked ? "abc" : "!#1";
+                    ShiftManager.CurrentShiftState = ControlShiftStates.NotActive;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
 
         private ShiftManager _shiftManager;
         public ShiftManager ShiftManager
@@ -81,6 +99,21 @@ namespace VirtualKeyboard
                 if (_shiftManager != value)
                 {
                     _shiftManager = value;
+                    OnPropertyChanged();
+
+                }
+            }
+        }
+
+        private ControlManager _controlManager;
+        public ControlManager ControlManager
+        {
+            get => _controlManager;
+            set
+            {
+                if (_controlManager != value)
+                {
+                    _controlManager = value;
                     OnPropertyChanged();
 
                 }
@@ -113,7 +146,10 @@ namespace VirtualKeyboard
             CopiedText = "";
             TextSelected = new Selection();
             ShiftManager = new ShiftManager();
+            ControlManager = new ControlManager();
+
             ShiftManager.PropertyChanged += ShiftManager_PropertyChanged;
+            ControlManager.PropertyChanged += ControlManager_PropertyChanged;
 
 
             switch (charset)
@@ -130,9 +166,21 @@ namespace VirtualKeyboard
 
         private void ShiftManager_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ShiftManager.CurrentCasing))
+            if (e.PropertyName == nameof(ShiftManager.CurrentShiftState))
             {
                 OnPropertyChanged(nameof(ShiftManager));
+            }
+        }
+
+        private void ControlManager_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ControlManager.CurrentCtrlState))
+            {
+                OnPropertyChanged(nameof(ControlManager));
+            }
+            else if (e.PropertyName == nameof(ControlManager.IsControlActive))
+            {
+                OnPropertyChanged(nameof(ControlManager));
             }
         }
 
@@ -149,12 +197,22 @@ namespace VirtualKeyboard
 
         private void OnSpace_Click(object sender, RoutedEventArgs e)
         {
-            AddCharToText(' ');
+            if (TextSelected.CharacterCount != 0)
+            {
+                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+                textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
+                AddCharToText(ShiftManager.ApplyCasing(' ', true));
+                TextSelected.Reset();
+            }
+            else
+            {
+                AddCharToText(ShiftManager.ApplyCasing(' ', true));
+            }
         }
 
         private void Character_Click(object sender, RoutedEventArgs e)
         {
-            if (IsControlActive)
+            if (ControlManager.IsCtrlActiveButtonPressed())
             {
                 CombinationPressed(Convert.ToChar(((Button)sender).Content));
             }
@@ -174,22 +232,10 @@ namespace VirtualKeyboard
             }
         }
 
-        private void CaretPosSelected(object sender, MouseButtonEventArgs e)
-        {
-            if (TextSelected.CharacterCount != 0)
-            {
-                TextSelected.Reset();
-            }
-            Task.Run(() =>
-            {
-                Task.Delay(200).Wait();
-                CaretPos = textBox.CaretIndex;
-            });
-        }
 
         private void DecresaseCaretPos_Click(object sender, RoutedEventArgs e)
         {
-            if (IsControlActive)
+            if (ControlManager.IsCtrlActiveButtonPressed())
             {
                 if (CaretPos > 0)
                 {
@@ -217,7 +263,7 @@ namespace VirtualKeyboard
 
         private void IncreaseCaretPos_Click(object sender, RoutedEventArgs e)
         {
-            if (IsControlActive)
+            if (ControlManager.IsCtrlActiveButtonPressed())
             {
                 if (CaretPos < Text.Length)
                 {
@@ -245,19 +291,26 @@ namespace VirtualKeyboard
 
         private void BackSpace_Click(object sender, RoutedEventArgs e)
         {
-            if (CaretPos > 0)
+            if (TextSelected.CharacterCount != 0)
             {
-                Text = Text.Remove(CaretPos - 1, 1);
-                CaretPos--;
+                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+                TextSelected.Reset();
             }
+            else
+            {
+                if (CaretPos > 0)
+                {
+                    Text = Text.Remove(CaretPos - 1, 1);
+                    CaretPos--;
+                }
+            }
+
             textBox.Focus();
             textBox.CaretIndex = CaretPos;
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            textBox.Focus();
-
             if (TextSelected.CharacterCount != 0)
             {
                 Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
@@ -270,14 +323,24 @@ namespace VirtualKeyboard
                     Text = Text.Remove(CaretPos, 1);
                 }
             }
+
+            textBox.Focus();
             textBox.CaretIndex = CaretPos;
         }
 
-        private void SpeacialChars_Click(object sender, RoutedEventArgs e)
+        private void Enter_Click(object sender, RoutedEventArgs e)
         {
-            KeyChars = (bool)specialCharsToogleButton.IsChecked ? _charSetKeyboard.SpeacialCharacters.CharactersListByRow : _charSetKeyboard.Alphabet.CharactersListByRow;
-            specialCharsToogleButton.Content = (bool)specialCharsToogleButton.IsChecked ? "abc" : "!#1";
-            ShiftManager.CurrentCasing = ShiftManager.Casing.LowerCase;
+            if (TextSelected.CharacterCount != 0)
+            {
+                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+                textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
+                AddCharToText(ShiftManager.ApplyCasing('\n', true));
+                TextSelected.Reset();
+            }
+            else
+            {
+                AddCharToText(ShiftManager.ApplyCasing('\n', true));
+            }
         }
 
         private void Control_Click(object sender, RoutedEventArgs e)
@@ -287,6 +350,7 @@ namespace VirtualKeyboard
                 textBox.Focus();
                 textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
             }
+            IsSpeacialCharsChecked = false;
         }
 
         private void CombinationPressed(char character)
@@ -312,7 +376,7 @@ namespace VirtualKeyboard
         {
             textBox.Focus();
             CaretPos = TextSelected.StartIndex = 0;
-            TextSelected.CharacterCount = -Text.Length;
+            TextSelected.CharacterCount = Text.Length;
             textBox.SelectAll();
         }
 
@@ -321,7 +385,10 @@ namespace VirtualKeyboard
             textBox.Focus();
             CopiedText = Text.Substring(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
             textBox.CaretIndex = CaretPos;
-            textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+            if (TextSelected.CharacterCount != 0)
+            {
+                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+            }
         }
 
         private void CtrlVCombinationPressed()
@@ -344,26 +411,58 @@ namespace VirtualKeyboard
         private void CtrlXCombinationPressed()
         {
             textBox.Focus();
-            if (textBox.IsSelectionActive)
+            if (TextSelected.CharacterCount != 0)
             {
                 CopiedText = Text.Substring(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
                 Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
                 textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
-                textBox.CaretIndex = CaretPos;
                 TextSelected.Reset();
             }
+            textBox.CaretIndex = CaretPos;
 
         }
 
         private void AddCharToText(char character)
         {
+            textBox.Focus();
             Text = Text.Insert(CaretPos, character.ToString());
             CaretPos++;
-            textBox.Focus();
             textBox.CaretIndex = CaretPos;
         }
 
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            BottomButtonHeight = MainWindow.Height / 10;
 
+        }
+
+        //protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        //{
+
+        //    if (sizeInfo.WidthChanged)
+        //    {
+        //        CharFontsize = Height / _charFontsize;
+        //    }
+        //    else
+        //    {
+        //        //this.Width = sizeInfo.NewSize.Width * _aspectRation;
+        //    }
+        //}
+
+        private void TextSelectedViaClick(object sender, MouseButtonEventArgs e)
+        {
+            if (textBox.SelectionLength > 0)
+            {
+                TextSelected.StartIndex = textBox.SelectionStart;
+                TextSelected.CharacterCount = textBox.SelectionLength;
+                textBox.CaretIndex = CaretPos = textBox.SelectionStart;
+                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+            }
+            else
+            {
+                CaretPos = textBox.CaretIndex;
+            }
+        }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
