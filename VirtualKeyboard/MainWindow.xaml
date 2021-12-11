@@ -27,5 +27,12 @@
                                                  Title="{Binding Title}"
                                                  CharSet="HU"/>
         </Grid>
+        <ComboBox IsReadOnly="False"
+                  IsEditable="True">
+            <ComboBoxItem Content="text1"/>
+            <ComboBoxItem Content="text2"/>
+            <ComboBoxItem Content="text3"/>
+            <ComboBoxItem Content="text4"/>
+        </ComboBox>
     </StackPanel>
 </mah:MetroWindow>

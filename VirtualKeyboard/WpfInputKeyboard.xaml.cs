@@ -26,9 +26,11 @@ namespace VirtualKeyboard
 
         private Keyboard_Base _charSetKeyboard;
 
-        public Selection TextSelected { get; set; }
+        public int CaretPos { get; set; }
 
         public string CopiedText { get; set; }
+
+        public string SelectedText { get; set; }
 
         private string _text;
         public string Text
@@ -89,7 +91,6 @@ namespace VirtualKeyboard
             }
         }
 
-
         private ShiftManager _shiftManager;
         public ShiftManager ShiftManager
         {
@@ -120,9 +121,6 @@ namespace VirtualKeyboard
             }
         }
 
-
-        public int CaretPos { get; set; }
-
         private List<List<char>> _keyChars;
         public List<List<char>> KeyChars
         {
@@ -137,6 +135,8 @@ namespace VirtualKeyboard
             }
         }
 
+
+
         public WpfInputKeyboard(string charset)
         {
 
@@ -144,7 +144,6 @@ namespace VirtualKeyboard
             DataContext = this;
 
             CopiedText = "";
-            TextSelected = new Selection();
             ShiftManager = new ShiftManager();
             ControlManager = new ControlManager();
 
@@ -163,6 +162,8 @@ namespace VirtualKeyboard
             }
             KeyChars = _charSetKeyboard.Alphabet.CharactersListByRow;
         }
+
+
 
         private void ShiftManager_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -197,12 +198,12 @@ namespace VirtualKeyboard
 
         private void OnSpace_Click(object sender, RoutedEventArgs e)
         {
-            if (TextSelected.CharacterCount != 0)
+            if (textBox.SelectionLength > 0)
             {
-                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
+                int selectionStartIndex = textBox.SelectionStart;
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+                textBox.CaretIndex = CaretPos = selectionStartIndex;
                 AddCharToText(ShiftManager.ApplyCasing(' ', true));
-                TextSelected.Reset();
             }
             else
             {
@@ -218,12 +219,12 @@ namespace VirtualKeyboard
             }
             else
             {
-                if (TextSelected.CharacterCount != 0)
+                if (textBox.SelectionLength > 0)
                 {
-                    Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                    textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
+                    int selectionStartIndex = textBox.SelectionStart;
+                    Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+                    textBox.CaretIndex = CaretPos = selectionStartIndex;
                     AddCharToText(ShiftManager.ApplyCasing(Convert.ToChar(((Button)sender).Content), true));
-                    TextSelected.Reset();
                 }
                 else
                 {
@@ -232,69 +233,69 @@ namespace VirtualKeyboard
             }
         }
 
-
         private void DecresaseCaretPos_Click(object sender, RoutedEventArgs e)
         {
+            textBox.Focus();
             if (ControlManager.IsCtrlActiveButtonPressed())
             {
                 if (CaretPos > 0)
                 {
                     CaretPos--;
-                    TextSelected.CharacterCount--;
-                    TextSelected.StartIndex = TextSelected.CharacterCount < 0 ? CaretPos : CaretPos - TextSelected.CharacterCount;
+                    textBox.SelectionStart = CaretPos;
+                    if (textBox.SelectionLength > 0)
+                    {
+                        textBox.SelectionLength++;
+                    }
+                    else
+                    {
+                        textBox.SelectionLength = 1;
+                    }
                 }
-                textBox.Focus();
-                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
             }
             else
             {
-                if (TextSelected.CharacterCount != 0)
-                {
-                    TextSelected.Reset();
-                }
                 if (CaretPos > 0)
                 {
                     CaretPos--;
                 }
-                textBox.Focus();
                 textBox.CaretIndex = CaretPos;
             }
         }
 
         private void IncreaseCaretPos_Click(object sender, RoutedEventArgs e)
         {
+            textBox.Focus();
             if (ControlManager.IsCtrlActiveButtonPressed())
             {
                 if (CaretPos < Text.Length)
                 {
                     CaretPos++;
-                    TextSelected.CharacterCount++;
-                    TextSelected.StartIndex = TextSelected.CharacterCount < 0 ? CaretPos : CaretPos - TextSelected.CharacterCount;
+                    if (textBox.SelectionLength > 0)
+                    {
+                        textBox.SelectionLength++;
+                    }
+                    else
+                    {
+                        textBox.SelectionStart = CaretPos - 1;
+                        textBox.SelectionLength = 1;
+                    }
                 }
-                textBox.Focus();
-                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
             }
             else
             {
-                if (TextSelected.CharacterCount != 0)
-                {
-                    TextSelected.Reset();
-                }
                 if (CaretPos < Text.Length)
                 {
                     CaretPos++;
                 }
-                textBox.Focus();
                 textBox.CaretIndex = CaretPos;
             }
         }
 
         private void BackSpace_Click(object sender, RoutedEventArgs e)
         {
-            if (TextSelected.CharacterCount != 0)
+            if (textBox.SelectionLength > 0)
             {
-                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                TextSelected.Reset();
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
             }
             else
             {
@@ -311,10 +312,9 @@ namespace VirtualKeyboard
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (TextSelected.CharacterCount != 0)
+            if (textBox.SelectionLength > 0)
             {
-                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                TextSelected.Reset();
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
             }
             else
             {
@@ -330,12 +330,12 @@ namespace VirtualKeyboard
 
         private void Enter_Click(object sender, RoutedEventArgs e)
         {
-            if (TextSelected.CharacterCount != 0)
+            if (textBox.SelectionLength > 0)
             {
-                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
+                int selectionStartIndex = textBox.SelectionStart;
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+                textBox.CaretIndex = CaretPos = selectionStartIndex;
                 AddCharToText(ShiftManager.ApplyCasing('\n', true));
-                TextSelected.Reset();
             }
             else
             {
@@ -345,12 +345,13 @@ namespace VirtualKeyboard
 
         private void Control_Click(object sender, RoutedEventArgs e)
         {
-            if (TextSelected.CharacterCount != 0)
-            {
-                textBox.Focus();
-                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-            }
+            textBox.Focus();
             IsSpeacialCharsChecked = false;
+        }
+
+        private void Shift_Click(object sender, RoutedEventArgs e)
+        {
+            textBox.Focus();
         }
 
         private void CombinationPressed(char character)
@@ -375,30 +376,27 @@ namespace VirtualKeyboard
         private void CtrlACombinationPressed()
         {
             textBox.Focus();
-            CaretPos = TextSelected.StartIndex = 0;
-            TextSelected.CharacterCount = Text.Length;
             textBox.SelectAll();
         }
 
         private void CtrlCCombinationPressed()
         {
             textBox.Focus();
-            CopiedText = Text.Substring(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
+            int selectionStart = textBox.SelectionStart;
+            int selectionLength = textBox.SelectionLength;
+            CopiedText = Text.Substring(textBox.SelectionStart, textBox.SelectionLength);
             textBox.CaretIndex = CaretPos;
-            if (TextSelected.CharacterCount != 0)
-            {
-                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-            }
+            textBox.SelectionStart = selectionStart;
+            textBox.SelectionLength = selectionLength;
         }
 
         private void CtrlVCombinationPressed()
         {
-
-            if (TextSelected.CharacterCount != 0)
+            if (textBox.SelectionLength > 0)
             {
-                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
-                TextSelected.Reset();
+                int selectionStartIndex = textBox.SelectionStart;
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+                textBox.CaretIndex = CaretPos = selectionStartIndex;
             }
 
             textBox.Focus();
@@ -411,12 +409,12 @@ namespace VirtualKeyboard
         private void CtrlXCombinationPressed()
         {
             textBox.Focus();
-            if (TextSelected.CharacterCount != 0)
+            if (textBox.SelectionLength > 0)
             {
-                CopiedText = Text.Substring(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                Text = Text.Remove(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-                textBox.CaretIndex = CaretPos = TextSelected.StartIndex;
-                TextSelected.Reset();
+                int selectionStartIndex = textBox.SelectionStart;
+                CopiedText = Text.Substring(textBox.SelectionStart, textBox.SelectionLength);
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+                textBox.CaretIndex = CaretPos = selectionStartIndex;
             }
             textBox.CaretIndex = CaretPos;
 
@@ -433,36 +431,23 @@ namespace VirtualKeyboard
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             BottomButtonHeight = MainWindow.Height / 10;
-
         }
-
-        //protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-        //{
-
-        //    if (sizeInfo.WidthChanged)
-        //    {
-        //        CharFontsize = Height / _charFontsize;
-        //    }
-        //    else
-        //    {
-        //        //this.Width = sizeInfo.NewSize.Width * _aspectRation;
-        //    }
-        //}
 
         private void TextSelectedViaClick(object sender, MouseButtonEventArgs e)
         {
-            if (textBox.SelectionLength > 0)
-            {
-                TextSelected.StartIndex = textBox.SelectionStart;
-                TextSelected.CharacterCount = textBox.SelectionLength;
-                textBox.CaretIndex = CaretPos = textBox.SelectionStart;
-                textBox.Select(TextSelected.StartIndex, Math.Abs(TextSelected.CharacterCount));
-            }
-            else
+            if (textBox.SelectionLength == 0)
             {
                 CaretPos = textBox.CaretIndex;
             }
         }
+        private void SaveSelectedTextOnLostFocus(object sender, RoutedEventArgs e)
+        {
+            if (textBox.SelectionLength > 0)
+            {
+                SelectedText = textBox.SelectedText;
+            }
+        }
+
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

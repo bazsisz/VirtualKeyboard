@@ -33,6 +33,7 @@
                  Name="textBox"
                  FontSize="20"
                  PreviewMouseLeftButtonUp="TextSelectedViaClick"
+                 LostFocus="SaveSelectedTextOnLostFocus"
                  VerticalScrollBarVisibility="Auto"/>
         <!--#endregion-->
 
@@ -133,10 +134,11 @@
             <DockPanel DockPanel.Dock="Left">
                 <!--#region LeftShift-->
                 <ToggleButton IsThreeState="True"
+                              Click="Shift_Click"
                               Margin="3"
                               DockPanel.Dock="Left"
                               VerticalAlignment="Bottom"
-                              MinWidth="48"
+                              MinWidth="50"
                               MinHeight="40"
                               Width="{Binding ElementName=specialCharsToogleButton, Path=ActualWidth}"
                               Height="{Binding ElementName=specialCharsToogleButton, Path=ActualHeight}"
@@ -144,9 +146,7 @@
                               IsEnabled="{Binding ControlManager.IsControlActive, Converter={localconverters:InvertedBooleanConverter}}">
                     <ToggleButton.Content>
                         <Viewbox>
-                            <IconPacks:PackIconBootstrapIcons Kind="ShiftFill"
-                                                              MinHeight="25"
-                                                              MinWidth="30"/>
+                            <IconPacks:PackIconBootstrapIcons Kind="ShiftFill"/>
                         </Viewbox>
                     </ToggleButton.Content>
                 </ToggleButton>
@@ -171,9 +171,7 @@
                     <ToggleButton.Content>
                         <Viewbox>
 
-                            <IconPacks:PackIconBootstrapIcons Kind="ShiftFill"
-                                                              MinHeight="25"
-                                                              MinWidth="30"/>
+                            <IconPacks:PackIconBootstrapIcons Kind="ShiftFill"/>
                         </Viewbox>
                     </ToggleButton.Content>
                 </ToggleButton>
@@ -252,7 +250,6 @@
                 <ItemsControl  ItemsSource="{Binding KeyChars}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-
                             <ItemsControl  ItemsSource="{Binding}"
                                            Margin="5">
                                 <ItemsControl.ItemTemplate>
