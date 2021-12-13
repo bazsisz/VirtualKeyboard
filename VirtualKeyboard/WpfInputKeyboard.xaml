@@ -29,11 +29,10 @@
         <TextBox Margin="10"
                  AcceptsReturn="True"
                  Height="80"
-                 Text="{Binding Text}"
+                 Text="{Binding InputText.Text, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                  Name="textBox"
                  FontSize="20"
                  PreviewMouseLeftButtonUp="TextSelectedViaClick"
-                 LostFocus="SaveSelectedTextOnLostFocus"
                  VerticalScrollBarVisibility="Auto"/>
         <!--#endregion-->
 

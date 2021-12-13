@@ -1,24 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using VirtualKeyboard.Bases;
 
 namespace VirtualKeyboard
 {
-    public class ControlManager : INotifyPropertyChanged
+    public class ControlManager : NotifyPropertyChanged_Base
     {
         private ControlShiftStates _currentCtrlState;
         public ControlShiftStates CurrentCtrlState
         {
-            get { return _currentCtrlState; }
-            set
-            {
-                if (_currentCtrlState != value)
-                {
-                    _currentCtrlState = value;
-                    OnPropertyChanged();
-
-                }
-            }
+            get => _currentCtrlState;
+            set => SetProperty(ref _currentCtrlState, ref value);
         }
 
         public bool IsControlActive
@@ -32,19 +25,5 @@ namespace VirtualKeyboard
             CurrentCtrlState = CurrentCtrlState == ControlShiftStates.ActiveUntilButtonPressed ? ControlShiftStates.NotActive : CurrentCtrlState;
             return isActive;
         }
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-
-            try
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"PropertyChanged event handler FAILED : {ex.Message}");
-            }
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

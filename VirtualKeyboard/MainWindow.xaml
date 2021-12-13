@@ -1,38 +1,92 @@
 ﻿<mah:MetroWindow  x:Class="VirtualKeyboard.MainWindow"
                   x:ClassModifier="internal"
-                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  xmlns:local="clr-namespace:VirtualKeyboard" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                  xmlns:local="clr-namespace:VirtualKeyboard"
+                  xmlns:localinputchecks="clr-namespace:VirtualKeyboard.InputChecks"
+                  xmlns:localconverters="clr-namespace:VirtualKeyboard.Converters"
                   mc:Ignorable="d"
                   Title="MainWindow" Height="450" Width="800">
+    <mah:MetroWindow.Resources>
+        <localinputchecks:InputCheck_Double x:Key="InputCheckDouble"/>
+        <localinputchecks:InputCheck_None x:Key="InputCheckNone"/>
+    </mah:MetroWindow.Resources>
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <!--#region TextBox-->
             <TextBlock Text="{Binding Title ,FallbackValue= Something}"
                        VerticalAlignment="Center"
                        Grid.Row="0"
                        Grid.Column="0"/>
+            <TextBox Grid.Column="1"
+                     x:Name="TextBox"
+                     Margin="15"/>
             <local:VirtualKeyboardTextBoxControl Grid.Row="0"
-                                                 Grid.Column="1"
-                                                 Text="{Binding InputText}"
+                                                 Grid.Column="2"
+                                                 Text="{Binding ElementName=TextBox, Path=Text}"
+                                                 InputCheck="{Binding Source={StaticResource InputCheckNone}, Path=., Mode=OneWay}"
                                                  Title="{Binding Title}"
                                                  CharSet="HU"/>
+            <!--#endregion-->
+            
+            <!--#region ComboBox-->
+            <TextBlock Text="ComboBoxItem"
+                       x:Name="TextBlock2"
+                       VerticalAlignment="Center"
+                       Grid.Row="1"
+                       Grid.Column="0"/>
+            
+            <ComboBox Grid.Column="1"
+                      Grid.Row="1"
+                      IsReadOnly="False"
+                      IsEditable="True"
+                      x:Name="ComboBox"
+                      Margin="15">
+                <ComboBoxItem Content="text1"/>
+                <ComboBoxItem Content="text2"/>
+                <ComboBoxItem Content="text3"/>
+                <ComboBoxItem Content="text4"/>
+            </ComboBox>
+            <local:VirtualKeyboardTextBoxControl Grid.Row="1"
+                                                 Grid.Column="2"
+                                                 Text="{Binding ElementName=ComboBox, Path=Text}"
+                                                 InputCheck="{Binding Source={StaticResource InputCheckNone}, Path=., Mode=OneWay}"
+                                                 Title="{Binding ElementName=TextBlock2, Path=Text}"
+                                                 CharSet="HU"/>
+            <!--#endregion-->
+            
+            <!--#region NumericUpDown-->
+            <TextBlock Text="NumericUpDownItem"
+                       x:Name="TextBlock3"
+                       VerticalAlignment="Center"
+                       Grid.Row="2"
+                       Grid.Column="0"/>
+            <mah:NumericUpDown x:Name="numericUpDown"
+                               Grid.Row="2"
+                               Grid.Column="1"
+                               Margin="15"/>
+            <local:VirtualKeyboardTextBoxControl Grid.Row="2"
+                                                 Grid.Column="2"
+                                                 Text ="{Binding ElementName=numericUpDown, Path=Value, Converter={localconverters:NullableDoubleToString}}"
+                                                 InputCheck="{Binding Source={StaticResource InputCheckDouble}, Path=., Mode=OneWay}"
+                                                 Title="{Binding ElementName=TextBlock3, Path=Text}"
+                                                 CharSet="HU"/>
+            <!--#endregion-->
         </Grid>
-        <ComboBox IsReadOnly="False"
-                  IsEditable="True">
-            <ComboBoxItem Content="text1"/>
-            <ComboBoxItem Content="text2"/>
-            <ComboBoxItem Content="text3"/>
-            <ComboBoxItem Content="text4"/>
-        </ComboBox>
+
+
     </StackPanel>
 </mah:MetroWindow>

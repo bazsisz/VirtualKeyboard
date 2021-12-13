@@ -15,12 +15,7 @@ namespace VirtualKeyboard.Converters
               values[1] is double height)
             {
                 double area = width * height;
-                if (area == 0)
-                {
-                    return 20d;
-                }
-                var a = Interpolate(area, 2050, 21828, 20, 75);
-                return a;
+                return area != 0 ? Interpolate(area, 2050, 21828, 20, 75) : 20d;
             }
             throw new Exception("Error in ButtonToFontSize");
         }

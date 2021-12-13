@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using VirtualKeyboard.InputChecks;
 
 namespace VirtualKeyboard
 {
@@ -30,17 +31,14 @@ namespace VirtualKeyboard
 
         public string CopiedText { get; set; }
 
-        public string SelectedText { get; set; }
-
-        private string _text;
         public string Text
         {
-            get => _text;
+            get => _inputText.Text;
             set
             {
-                if (_text != value)
+                if (_inputText.Text != value)
                 {
-                    _text = value;
+                    _inputText.Text = value;
                     OnPropertyChanged();
                 }
             }
@@ -121,6 +119,21 @@ namespace VirtualKeyboard
             }
         }
 
+        private InputCheck_Base _inputText;
+        public InputCheck_Base InputText
+        {
+            get => _inputText;
+            set
+            {
+                if (_inputText != value)
+                {
+                    _inputText = value;
+                    OnPropertyChanged();
+
+                }
+            }
+        }
+
         private List<List<char>> _keyChars;
         public List<List<char>> KeyChars
         {
@@ -136,7 +149,6 @@ namespace VirtualKeyboard
         }
 
 
-
         public WpfInputKeyboard(string charset)
         {
 
@@ -144,6 +156,7 @@ namespace VirtualKeyboard
             DataContext = this;
 
             CopiedText = "";
+
             ShiftManager = new ShiftManager();
             ControlManager = new ControlManager();
 
@@ -198,17 +211,7 @@ namespace VirtualKeyboard
 
         private void OnSpace_Click(object sender, RoutedEventArgs e)
         {
-            if (textBox.SelectionLength > 0)
-            {
-                int selectionStartIndex = textBox.SelectionStart;
-                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
-                textBox.CaretIndex = CaretPos = selectionStartIndex;
-                AddCharToText(ShiftManager.ApplyCasing(' ', true));
-            }
-            else
-            {
-                AddCharToText(ShiftManager.ApplyCasing(' ', true));
-            }
+            AppendText(' ');
         }
 
         private void Character_Click(object sender, RoutedEventArgs e)
@@ -219,17 +222,7 @@ namespace VirtualKeyboard
             }
             else
             {
-                if (textBox.SelectionLength > 0)
-                {
-                    int selectionStartIndex = textBox.SelectionStart;
-                    Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
-                    textBox.CaretIndex = CaretPos = selectionStartIndex;
-                    AddCharToText(ShiftManager.ApplyCasing(Convert.ToChar(((Button)sender).Content), true));
-                }
-                else
-                {
-                    AddCharToText(ShiftManager.ApplyCasing(Convert.ToChar(((Button)sender).Content), true));
-                }
+                AppendText(Convert.ToChar(((Button)sender).Content));
             }
         }
 
@@ -330,17 +323,7 @@ namespace VirtualKeyboard
 
         private void Enter_Click(object sender, RoutedEventArgs e)
         {
-            if (textBox.SelectionLength > 0)
-            {
-                int selectionStartIndex = textBox.SelectionStart;
-                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
-                textBox.CaretIndex = CaretPos = selectionStartIndex;
-                AddCharToText(ShiftManager.ApplyCasing('\n', true));
-            }
-            else
-            {
-                AddCharToText(ShiftManager.ApplyCasing('\n', true));
-            }
+            AppendText('\n');
         }
 
         private void Control_Click(object sender, RoutedEventArgs e)
@@ -420,7 +403,22 @@ namespace VirtualKeyboard
 
         }
 
-        private void AddCharToText(char character)
+        private void AppendText(char character) 
+        {
+            if (textBox.SelectionLength > 0)
+            {
+                int selectionStartIndex = textBox.SelectionStart;
+                Text = Text.Remove(textBox.SelectionStart, textBox.SelectionLength);
+                textBox.CaretIndex = CaretPos = selectionStartIndex;
+                InsertCharToText(ShiftManager.ApplyCasing(character, true));
+            }
+            else
+            {
+                InsertCharToText(ShiftManager.ApplyCasing(character, true));
+            }
+        }
+
+        private void InsertCharToText(char character)
         {
             textBox.Focus();
             Text = Text.Insert(CaretPos, character.ToString());
@@ -438,13 +436,6 @@ namespace VirtualKeyboard
             if (textBox.SelectionLength == 0)
             {
                 CaretPos = textBox.CaretIndex;
-            }
-        }
-        private void SaveSelectedTextOnLostFocus(object sender, RoutedEventArgs e)
-        {
-            if (textBox.SelectionLength > 0)
-            {
-                SelectedText = textBox.SelectedText;
             }
         }
 

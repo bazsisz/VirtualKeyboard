@@ -17,19 +17,9 @@ namespace VirtualKeyboard
             set => SetProperty(ref _title, ref value);
         }
 
-        private string _inputText;
-        public string InputText
-        {
-            get => _inputText;
-            set => SetProperty(ref _inputText, ref value);
-        }
-
-        public Keyboard_Base Keyboard { get; set; }
-
         public MainViewModel()
         {
-            Title = "Something";
-            Keyboard = new Hungarian_Keyboard();
+            Title = "TextBox";
         }
     }
 }

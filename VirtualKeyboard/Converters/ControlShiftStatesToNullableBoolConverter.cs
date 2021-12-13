@@ -34,7 +34,7 @@ namespace VirtualKeyboard.Converters
         {
             if (targetType == typeof(ControlShiftStates))
             {
-                bool? shiftState = (bool?)value;
+                bool? shiftState = value as bool?;
                 switch (shiftState)
                 {
                     case null:

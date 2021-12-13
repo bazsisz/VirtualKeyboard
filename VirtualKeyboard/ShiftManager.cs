@@ -1,25 +1,18 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using VirtualKeyboard.Bases;
 
 namespace VirtualKeyboard
 {
 
-    public class ShiftManager : INotifyPropertyChanged
+    public class ShiftManager : NotifyPropertyChanged_Base
     {
         private ControlShiftStates _currentShiftState;
         public ControlShiftStates CurrentShiftState
         {
             get => _currentShiftState;
-            set
-            {
-                if (_currentShiftState != value)
-                {
-                    _currentShiftState = value;
-                    OnPropertyChanged();
-
-                }
-            }
+            set => SetProperty(ref _currentShiftState, ref value);
         }
 
         public char ApplyCasing(char character, bool resetFirstLetterUpperCaseToLowerCase)
@@ -37,17 +30,5 @@ namespace VirtualKeyboard
                     return char.ToUpper(character);
             }
         }
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            try
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"PropertyChanged event handler FAILED : {ex.Message}");
-            }
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
