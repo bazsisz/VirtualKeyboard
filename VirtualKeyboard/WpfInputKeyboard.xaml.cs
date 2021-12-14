@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VirtualKeyboard.InputChecks;
+using static VirtualKeyboard.VirtualKeyboardTextBoxControl;
 
 namespace VirtualKeyboard
 {
@@ -22,7 +23,7 @@ namespace VirtualKeyboard
     /// <summary>
     /// Interaction logic for WpfInputKeyboard.xaml
     /// </summary>
-    internal partial class WpfInputKeyboard : MetroWindow, INotifyPropertyChanged
+    public partial class WpfInputKeyboard : MetroWindow, INotifyPropertyChanged
     {
 
         private Keyboard_Base _charSetKeyboard;
@@ -33,12 +34,12 @@ namespace VirtualKeyboard
 
         public string Text
         {
-            get => _inputText.Text;
+            get => _textModel.Text;
             set
             {
-                if (_inputText.Text != value)
+                if (_textModel.Text != value)
                 {
-                    _inputText.Text = value;
+                    _textModel.Text = value;
                     OnPropertyChanged();
                 }
             }
@@ -81,7 +82,9 @@ namespace VirtualKeyboard
                 if (_isSpeacialCharsChecked != value)
                 {
                     _isSpeacialCharsChecked = value;
+
                     KeyChars = _isSpeacialCharsChecked ? _charSetKeyboard.SpeacialCharacters.CharactersListByRow : _charSetKeyboard.Alphabet.CharactersListByRow;
+
                     specialCharsText.Text = _isSpeacialCharsChecked ? "abc" : "!#1";
                     ShiftManager.CurrentShiftState = ControlShiftStates.NotActive;
                     OnPropertyChanged();
@@ -119,15 +122,15 @@ namespace VirtualKeyboard
             }
         }
 
-        private InputCheck_Base _inputText;
-        public InputCheck_Base InputText
+        private TextModel _textModel;
+        public TextModel TextModel
         {
-            get => _inputText;
+            get => _textModel;
             set
             {
-                if (_inputText != value)
+                if (_textModel != value)
                 {
-                    _inputText = value;
+                    _textModel = value;
                     OnPropertyChanged();
 
                 }
@@ -149,7 +152,7 @@ namespace VirtualKeyboard
         }
 
 
-        public WpfInputKeyboard(string charset)
+        public WpfInputKeyboard(CharSetLanguage charset, InputCheckType inputCheckType)
         {
 
             InitializeComponent();
@@ -157,19 +160,20 @@ namespace VirtualKeyboard
 
             CopiedText = "";
 
+            TextModel = new TextModel();
             ShiftManager = new ShiftManager();
             ControlManager = new ControlManager();
 
             ShiftManager.PropertyChanged += ShiftManager_PropertyChanged;
             ControlManager.PropertyChanged += ControlManager_PropertyChanged;
 
-
+            TextModel.SetInputCheck(inputCheckType);
             switch (charset)
             {
-                case "HU":
+                case CharSetLanguage.HU:
                     _charSetKeyboard = new Hungarian_Keyboard();
                     break;
-                case "EN":
+                case CharSetLanguage.EN:
                     _charSetKeyboard = new English_US_Keyboard();
                     break;
             }
@@ -231,19 +235,7 @@ namespace VirtualKeyboard
             textBox.Focus();
             if (ControlManager.IsCtrlActiveButtonPressed())
             {
-                if (CaretPos > 0)
-                {
-                    CaretPos--;
-                    textBox.SelectionStart = CaretPos;
-                    if (textBox.SelectionLength > 0)
-                    {
-                        textBox.SelectionLength++;
-                    }
-                    else
-                    {
-                        textBox.SelectionLength = 1;
-                    }
-                }
+                CombinationPressed('<');
             }
             else
             {
@@ -260,19 +252,7 @@ namespace VirtualKeyboard
             textBox.Focus();
             if (ControlManager.IsCtrlActiveButtonPressed())
             {
-                if (CaretPos < Text.Length)
-                {
-                    CaretPos++;
-                    if (textBox.SelectionLength > 0)
-                    {
-                        textBox.SelectionLength++;
-                    }
-                    else
-                    {
-                        textBox.SelectionStart = CaretPos - 1;
-                        textBox.SelectionLength = 1;
-                    }
-                }
+                CombinationPressed('>');
             }
             else
             {
@@ -353,6 +333,12 @@ namespace VirtualKeyboard
                 case 'v':
                     CtrlVCombinationPressed();
                     break;
+                case '<':
+                    CtrlDecreaseCombinationPressed();
+                    break;
+                case '>':
+                    CtrlIncreaseCombinationPressed();
+                    break;
             }
         }
 
@@ -403,7 +389,57 @@ namespace VirtualKeyboard
 
         }
 
-        private void AppendText(char character) 
+        private void CtrlDecreaseCombinationPressed()
+        {
+            if (CaretPos > 0)
+            {
+                CaretPos--;
+                if (textBox.SelectionLength > 0)
+                {
+                    if (CaretPos >= textBox.SelectionStart)
+                    {
+                        textBox.SelectionLength--;
+                    }
+                    else
+                    {
+                        textBox.SelectionStart = CaretPos;
+                        textBox.SelectionLength++;
+                    }
+                }
+                else
+                {
+                    textBox.SelectionStart = CaretPos;
+                    textBox.SelectionLength = 1;
+                }
+            }
+        }
+
+        private void CtrlIncreaseCombinationPressed()
+        {
+            if (CaretPos < Text.Length)
+            {
+                CaretPos++;
+                if (textBox.SelectionLength > 0)
+                {
+                    if (CaretPos <= textBox.SelectionStart + textBox.SelectionLength)
+                    {
+                        textBox.SelectionLength--;
+                        textBox.SelectionStart = CaretPos;
+                    }
+                    else
+                    {
+                        textBox.SelectionLength++;
+                    }
+                }
+                else
+                {
+                    textBox.SelectionStart = CaretPos - 1;
+                    textBox.SelectionLength = 1;
+                }
+            }
+        }
+
+        private void AppendText(char character)
         {
             if (textBox.SelectionLength > 0)
             {

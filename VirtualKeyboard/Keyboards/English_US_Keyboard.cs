@@ -13,7 +13,7 @@ namespace VirtualKeyboard
             Alphabet.NumberOfRows = 4;
             Alphabet.KeysInRows = new List<int>() { 10, 10, 9, 9 };
             SpeacialCharacters.NumberOfRows = 4;
-            SpeacialCharacters.KeysInRows = new List<int>() { 10, 10, 9, 9 };
+            SpeacialCharacters.KeysInRows = new List<int>() { 13, 12, 12, 11 };
             GetAlphabet();
             GetSpecialCharacters();
             ConstructKeyList(Alphabet);
@@ -30,7 +30,10 @@ namespace VirtualKeyboard
 
         protected override void GetSpecialCharacters()
         {
-            throw new NotImplementedException();
+            SpeacialCharacters.Keys = new List<char> { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ,'~', 'ˇ', '^',
+                                                     '+', '×', '÷', '=', '/', '_', '{', '}', '<', '>' ,'"', '\'', '˘',
+                                                     '!', '@', '#', '$', '|', '%', '&', '€', '*', '(', ')', '\\',
+                                                     '¨', '˝', '´', '˙', '`', '°', '[', ']', ';', '-', ':', '?'};
         }
     }
 }

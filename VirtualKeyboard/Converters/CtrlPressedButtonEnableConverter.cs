@@ -33,7 +33,7 @@ namespace VirtualKeyboard.Converters
                     return true;
                 }
             }
-            return DependencyProperty.UnsetValue;
+            throw new Exception("Error in CtrlPressedButtonEnableConverter");
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

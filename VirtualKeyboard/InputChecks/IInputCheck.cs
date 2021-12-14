@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace VirtualKeyboard.InputChecks
 {
-    class InputCheck_None : IInputCheck
+    public interface IInputCheck
     {
-        bool IInputCheck.CheckInputText(List<string> errors, string text)
-        {
-            return true;
-        }
+        bool CheckInputText(List<string> errors, string text);
     }
 }

@@ -14,14 +14,15 @@ namespace VirtualKeyboard.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((targetType == typeof(object) || targetType == typeof(string)) &&
+            if (targetType == typeof(object) &&
                values.Length == 2 &&
                (values[0] is char character) &&
                (values[1] is ShiftManager shiftManager))
             {
                 return shiftManager.ApplyCasing(character, false).ToString();
             }
-            return DependencyProperty.UnsetValue;
+
+            throw new Exception("Error in CharacterCasingConverter");
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

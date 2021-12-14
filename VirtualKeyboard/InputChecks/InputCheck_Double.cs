@@ -6,18 +6,16 @@ using System.Threading.Tasks;
 
 namespace VirtualKeyboard.InputChecks
 {
-    public class InputCheck_Double : InputCheck_Base
+    public class InputCheck_Double : IInputCheck
     {
-        protected override bool CheckInputText(List<string> errors)
+        bool IInputCheck.CheckInputText(List<string> errors, string text)
         {
+            if (!double.TryParse(text, out _))
             {
-                if (!double.TryParse(Text, out _))
-                {
-                    errors?.Add("Input needs to be a number!");
-                    return false;
-                }
-                return true;
+                errors?.Add("Input needs to be a number!");
+                return false;
             }
+            return true;
         }
     }
 }

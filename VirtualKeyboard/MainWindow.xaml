@@ -26,6 +26,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            
             <!--#region TextBox-->
             <TextBlock Text="{Binding Title ,FallbackValue= Something}"
                        VerticalAlignment="Center"
@@ -37,11 +38,11 @@
             <local:VirtualKeyboardTextBoxControl Grid.Row="0"
                                                  Grid.Column="2"
                                                  Text="{Binding ElementName=TextBox, Path=Text}"
-                                                 InputCheck="{Binding Source={StaticResource InputCheckNone}, Path=., Mode=OneWay}"
+                                                 InputCheck="None"
                                                  Title="{Binding Title}"
                                                  CharSet="HU"/>
             <!--#endregion-->
-            
+
             <!--#region ComboBox-->
             <TextBlock Text="ComboBoxItem"
                        x:Name="TextBlock2"
@@ -63,7 +64,7 @@
             <local:VirtualKeyboardTextBoxControl Grid.Row="1"
                                                  Grid.Column="2"
                                                  Text="{Binding ElementName=ComboBox, Path=Text}"
-                                                 InputCheck="{Binding Source={StaticResource InputCheckNone}, Path=., Mode=OneWay}"
+                                                 InputCheck="None"
                                                  Title="{Binding ElementName=TextBlock2, Path=Text}"
                                                  CharSet="HU"/>
             <!--#endregion-->
@@ -81,7 +82,7 @@
             <local:VirtualKeyboardTextBoxControl Grid.Row="2"
                                                  Grid.Column="2"
                                                  Text ="{Binding ElementName=numericUpDown, Path=Value, Converter={localconverters:NullableDoubleToString}}"
-                                                 InputCheck="{Binding Source={StaticResource InputCheckDouble}, Path=., Mode=OneWay}"
+                                                 InputCheck="Double"
                                                  Title="{Binding ElementName=TextBlock3, Path=Text}"
                                                  CharSet="HU"/>
             <!--#endregion-->

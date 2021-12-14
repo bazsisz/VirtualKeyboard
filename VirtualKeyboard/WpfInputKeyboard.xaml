@@ -1,6 +1,5 @@
 ﻿<mah:MetroWindow  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                   x:Class="VirtualKeyboard.WpfInputKeyboard"
-                  x:ClassModifier="internal"
                   x:Name="MainWindow"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -29,7 +28,7 @@
         <TextBox Margin="10"
                  AcceptsReturn="True"
                  Height="80"
-                 Text="{Binding InputText.Text, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                 Text="{Binding TextModel.Text, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                  Name="textBox"
                  FontSize="20"
                  PreviewMouseLeftButtonUp="TextSelectedViaClick"
@@ -249,25 +248,27 @@
                 <ItemsControl  ItemsSource="{Binding KeyChars}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <ItemsControl  ItemsSource="{Binding}"
+                            <ItemsControl  
+                                           ItemsSource="{Binding .}"
                                            Margin="5">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
 
-                                        <Button Margin="3"
+                                        <Button DataContext="{Binding .}"
+                                                Margin="3"
                                                 x:Name="charButton"
                                                 Padding="5"
                                                 Click="Character_Click">
                                             <Button.Content>
                                                 <MultiBinding Converter="{localconverters:CharacterCasingConverter}">
                                                     <Binding Path="."/>
-                                                    <Binding Path="ShiftManager" RelativeSource="{RelativeSource AncestorType=mah:MetroWindow}"/>
+                                                    <Binding Path="ShiftManager" ElementName="MainWindow"/>
                                                 </MultiBinding>
                                             </Button.Content>
                                             <Button.IsEnabled>
                                                 <MultiBinding Converter="{localconverters:CtrlPressedButtonEnableConverter}">
                                                     <Binding Path="."/>
-                                                    <Binding Path="ControlManager.CurrentCtrlState" RelativeSource="{RelativeSource AncestorType=mah:MetroWindow}" Converter="{localconverters:ControlShiftStatesToNullableBoolConverter}"/>
+                                                    <Binding Path="ControlManager.CurrentCtrlState" ElementName="MainWindow" Converter="{localconverters:ControlShiftStatesToNullableBoolConverter}"/>
                                                 </MultiBinding>
                                             </Button.IsEnabled>
                                             <Button.FontSize>

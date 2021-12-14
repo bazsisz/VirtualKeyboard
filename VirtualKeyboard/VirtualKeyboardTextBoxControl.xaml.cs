@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using VirtualKeyboard.InputChecks;
 
@@ -9,6 +10,20 @@ namespace VirtualKeyboard
     /// </summary>
     public partial class VirtualKeyboardTextBoxControl : UserControl
     {
+        public enum CharSetLanguage 
+        { 
+            HU,
+            EN
+        }
+
+        public enum InputCheckType
+        {
+            None,
+            Double
+        }
+
+        public InputCheckType CurrentInputCheckType { get; set; }
+
         public VirtualKeyboardTextBoxControl()
         {
             InitializeComponent();
@@ -16,18 +31,17 @@ namespace VirtualKeyboard
 
         private void EditTextButton_Click(object sender, RoutedEventArgs e)
         {
-            WpfInputKeyboard dialog = new WpfInputKeyboard(CharSet)
+            WpfInputKeyboard dialog = new WpfInputKeyboard(CharSet, CurrentInputCheckType)
             {
                 FieldTitle = Title,
-                InputText = InputCheck,
                 Text = Text ?? "",
                 CaretPos = Text != null ? Text.Length : 0,
             };
+
             if ((bool)dialog.ShowDialog())
             {
                 Text = dialog.Text;
             }
-
         }
 
         #region Text
@@ -45,14 +59,25 @@ namespace VirtualKeyboard
 
         #region InputCheck
         public static readonly DependencyProperty InputCheckProperty = DependencyProperty.Register(nameof(InputCheck),
-                                                                                                   typeof(InputCheck_Base),
+                                                                                                   typeof(InputCheckType),
                                                                                                    typeof(VirtualKeyboardTextBoxControl),
-                                                                                                   new FrameworkPropertyMetadata(null,
-                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-        public InputCheck_Base InputCheck
+                                                                                                   new FrameworkPropertyMetadata(InputCheckType.None,
+                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                                                                                                                          new PropertyChangedCallback(InputCheckTypeChanged)));
+
+        public InputCheckType InputCheck
         {
-            get { return (InputCheck_Base)GetValue(InputCheckProperty); }
+            get { return (InputCheckType)GetValue(InputCheckProperty); }
             set { SetValue(InputCheckProperty, value); }
+        }
+
+        private static void InputCheckTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is VirtualKeyboardTextBoxControl control &&
+                 e.NewValue is InputCheckType value)
+            {
+                control.CurrentInputCheckType = value;
+            }
         }
         #endregion
 
@@ -71,13 +96,13 @@ namespace VirtualKeyboard
 
         #region CharSet
         public static readonly DependencyProperty CharSetProperty = DependencyProperty.Register(nameof(CharSet),
-                                                                                                typeof(string),
+                                                                                                typeof(CharSetLanguage),
                                                                                                 typeof(VirtualKeyboardTextBoxControl),
-                                                                                                new FrameworkPropertyMetadata("",
+                                                                                                new FrameworkPropertyMetadata(CharSetLanguage.HU,
                                                                                                                           FrameworkPropertyMetadataOptions.None));
-        public string CharSet
+        public CharSetLanguage CharSet
         {
-            get { return (string)GetValue(CharSetProperty); }
+            get { return (CharSetLanguage)GetValue(CharSetProperty); }
             set { SetValue(CharSetProperty, value); }
         }
         #endregion
