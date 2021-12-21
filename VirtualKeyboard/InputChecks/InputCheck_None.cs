@@ -8,7 +8,7 @@ namespace VirtualKeyboard.InputChecks
 {
     class InputCheck_None : IInputCheck
     {
-        bool IInputCheck.CheckInputText(List<string> errors, string text)
+        public bool CheckInputText(List<string> errors, string text)
         {
             return true;
         }

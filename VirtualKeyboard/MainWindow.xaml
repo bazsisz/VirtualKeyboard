@@ -6,14 +6,9 @@
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:local="clr-namespace:VirtualKeyboard"
-                  xmlns:localinputchecks="clr-namespace:VirtualKeyboard.InputChecks"
                   xmlns:localconverters="clr-namespace:VirtualKeyboard.Converters"
                   mc:Ignorable="d"
                   Title="MainWindow" Height="450" Width="800">
-    <mah:MetroWindow.Resources>
-        <localinputchecks:InputCheck_Double x:Key="InputCheckDouble"/>
-        <localinputchecks:InputCheck_None x:Key="InputCheckNone"/>
-    </mah:MetroWindow.Resources>
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -26,7 +21,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
+
             <!--#region TextBox-->
             <TextBlock Text="{Binding Title ,FallbackValue= Something}"
                        VerticalAlignment="Center"
@@ -35,12 +30,12 @@
             <TextBox Grid.Column="1"
                      x:Name="TextBox"
                      Margin="15"/>
-            <local:VirtualKeyboardTextBoxControl Grid.Row="0"
-                                                 Grid.Column="2"
-                                                 Text="{Binding ElementName=TextBox, Path=Text}"
-                                                 InputCheck="None"
-                                                 Title="{Binding Title}"
-                                                 CharSet="HU"/>
+            <local:VirtualKeyboardControl Grid.Row="0"
+                                          Grid.Column="2"
+                                          CharSet="HU"
+                                          InputCheck="None"
+                                          Title="{Binding Title}"
+                                          ControlItem="{Binding ElementName=TextBox, Path=.}"/>
             <!--#endregion-->
 
             <!--#region ComboBox-->
@@ -49,7 +44,7 @@
                        VerticalAlignment="Center"
                        Grid.Row="1"
                        Grid.Column="0"/>
-            
+
             <ComboBox Grid.Column="1"
                       Grid.Row="1"
                       IsReadOnly="False"
@@ -61,14 +56,14 @@
                 <ComboBoxItem Content="text3"/>
                 <ComboBoxItem Content="text4"/>
             </ComboBox>
-            <local:VirtualKeyboardTextBoxControl Grid.Row="1"
-                                                 Grid.Column="2"
-                                                 Text="{Binding ElementName=ComboBox, Path=Text}"
-                                                 InputCheck="None"
-                                                 Title="{Binding ElementName=TextBlock2, Path=Text}"
-                                                 CharSet="HU"/>
+            <local:VirtualKeyboardControl Grid.Row="1"
+                                          Grid.Column="2"
+                                          CharSet="EN"
+                                          InputCheck="None"
+                                          Title="{Binding ElementName=TextBlock2, Path=Text}"
+                                          ControlItem="{Binding ElementName=ComboBox, Path=.}"/>
             <!--#endregion-->
-            
+
             <!--#region NumericUpDown-->
             <TextBlock Text="NumericUpDownItem"
                        x:Name="TextBlock3"
@@ -79,12 +74,12 @@
                                Grid.Row="2"
                                Grid.Column="1"
                                Margin="15"/>
-            <local:VirtualKeyboardTextBoxControl Grid.Row="2"
-                                                 Grid.Column="2"
-                                                 Text ="{Binding ElementName=numericUpDown, Path=Value, Converter={localconverters:NullableDoubleToString}}"
-                                                 InputCheck="Double"
-                                                 Title="{Binding ElementName=TextBlock3, Path=Text}"
-                                                 CharSet="HU"/>
+            <local:VirtualKeyboardControl Grid.Row="2"
+                                          Grid.Column="2"
+                                          CharSet="HU"
+                                          InputCheck="Double"
+                                          Title="{Binding ElementName=TextBlock3, Path=Text}"
+                                          ControlItem="{Binding ElementName=numericUpDown, Path=.}"/>
             <!--#endregion-->
         </Grid>
 

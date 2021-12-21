@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VirtualKeyboard.InputChecks;
-using static VirtualKeyboard.VirtualKeyboardTextBoxControl;
+using static VirtualKeyboard.VirtualKeyboardControl;
 
 namespace VirtualKeyboard
 {
@@ -23,13 +23,16 @@ namespace VirtualKeyboard
     /// <summary>
     /// Interaction logic for WpfInputKeyboard.xaml
     /// </summary>
-    public partial class WpfInputKeyboard : MetroWindow, INotifyPropertyChanged
+    internal partial class WpfInputKeyboard : MetroWindow, INotifyPropertyChanged
     {
 
-        private Keyboard_Base _charSetKeyboard;
+        private KeyboardModel KeyboardModel;
+        private double _sideButtonsWidthRatio;
+        private double _minSideButtonWidth = 50;
+        private double _sideButtonsHeightRatio;
+        private double _minSideButtonHeight = 40;
 
         public int CaretPos { get; set; }
-
         public string CopiedText { get; set; }
 
         public string Text
@@ -73,6 +76,34 @@ namespace VirtualKeyboard
             }
         }
 
+        private double _sideButtonsHeight;
+        public double SideButtonsHeight
+        {
+            get => _sideButtonsHeight;
+            set
+            {
+                if (_sideButtonsHeight != value)
+                {
+                    _sideButtonsHeight = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private double _sideButtonsWidth;
+        public double SideButtonsWidth
+        {
+            get => _sideButtonsWidth;
+            set
+            {
+                if (_sideButtonsWidth != value)
+                {
+                    _sideButtonsWidth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private bool _isSpeacialCharsChecked;
         public bool IsSpeacialCharsChecked
         {
@@ -83,7 +114,8 @@ namespace VirtualKeyboard
                 {
                     _isSpeacialCharsChecked = value;
 
-                    KeyChars = _isSpeacialCharsChecked ? _charSetKeyboard.SpeacialCharacters.CharactersListByRow : _charSetKeyboard.Alphabet.CharactersListByRow;
+                    KeyChars = _isSpeacialCharsChecked ? KeyboardModel.CharSetKeyboard.SpeacialCharacters.CharactersListByRow
+                                                       : KeyboardModel.CharSetKeyboard.Alphabet.CharactersListByRow;
 
                     specialCharsText.Text = _isSpeacialCharsChecked ? "abc" : "!#1";
                     ShiftManager.CurrentShiftState = ControlShiftStates.NotActive;
@@ -151,7 +183,6 @@ namespace VirtualKeyboard
             }
         }
 
-
         public WpfInputKeyboard(CharSetLanguage charset, InputCheckType inputCheckType)
         {
 
@@ -160,7 +191,11 @@ namespace VirtualKeyboard
 
             CopiedText = "";
 
+            _sideButtonsHeightRatio = _minSideButtonHeight / Height;
+            _sideButtonsWidthRatio = _minSideButtonWidth / Width;
+
             TextModel = new TextModel();
+            KeyboardModel = new KeyboardModel();
             ShiftManager = new ShiftManager();
             ControlManager = new ControlManager();
 
@@ -168,16 +203,8 @@ namespace VirtualKeyboard
             ControlManager.PropertyChanged += ControlManager_PropertyChanged;
 
             TextModel.SetInputCheck(inputCheckType);
-            switch (charset)
-            {
-                case CharSetLanguage.HU:
-                    _charSetKeyboard = new Hungarian_Keyboard();
-                    break;
-                case CharSetLanguage.EN:
-                    _charSetKeyboard = new English_US_Keyboard();
-                    break;
-            }
-            KeyChars = _charSetKeyboard.Alphabet.CharactersListByRow;
+            KeyboardModel.SetCharSetKeyboard(charset);
+            KeyChars = KeyboardModel.CharSetKeyboard.Alphabet.CharactersListByRow;
         }
 
 
@@ -220,20 +247,21 @@ namespace VirtualKeyboard
 
         private void Character_Click(object sender, RoutedEventArgs e)
         {
+            string charachter = ((TextBlock)((Viewbox)((Button)sender).Content).Child).Text;
             if (ControlManager.IsCtrlActiveButtonPressed())
             {
-                CombinationPressed(Convert.ToChar(((Button)sender).Content));
+                CombinationPressed(Convert.ToChar(charachter));
             }
             else
             {
-                AppendText(Convert.ToChar(((Button)sender).Content));
+                AppendText(Convert.ToChar(charachter));
             }
         }
 
         private void DecresaseCaretPos_Click(object sender, RoutedEventArgs e)
         {
             textBox.Focus();
-            if (ControlManager.IsCtrlActiveButtonPressed())
+            if (ShiftManager.IsShiftActiveButtonPressed())
             {
                 CombinationPressed('<');
             }
@@ -250,7 +278,7 @@ namespace VirtualKeyboard
         private void IncreaseCaretPos_Click(object sender, RoutedEventArgs e)
         {
             textBox.Focus();
-            if (ControlManager.IsCtrlActiveButtonPressed())
+            if (ShiftManager.IsShiftActiveButtonPressed())
             {
                 CombinationPressed('>');
             }
@@ -464,6 +492,8 @@ namespace VirtualKeyboard
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            SideButtonsHeight = Height * _sideButtonsHeightRatio * 1.25;
+            SideButtonsWidth = Width * _sideButtonsWidthRatio * 1.2;
             BottomButtonHeight = MainWindow.Height / 10;
         }
 
@@ -488,5 +518,18 @@ namespace VirtualKeyboard
             }
         }
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private void KeyUpOnKeyboard(object sender, KeyEventArgs e)
+        {
+            if ((e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control) ||
+                (e.Key == Key.X && Keyboard.Modifiers == ModifierKeys.Control))
+            {
+                CopiedText = textBox.SelectedText;
+            }
+            else
+            {
+                CaretPos = textBox.CaretIndex;
+            }
+        }
     }
 }

@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace VirtualKeyboard.InputChecks
 {
     public class InputCheck_Double : IInputCheck
     {
-        bool IInputCheck.CheckInputText(List<string> errors, string text)
+        public bool CheckInputText(List<string> errors, string text)
         {
+            if (string.IsNullOrEmpty(text)) 
+            {
+                return true;
+            }
+
             if (!double.TryParse(text, out _))
             {
                 errors?.Add("Input needs to be a number!");

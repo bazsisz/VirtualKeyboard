@@ -1,6 +1,8 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Windows;
 using System.Windows.Controls;
+using VirtualKeyboard.ControlHandlers;
 using VirtualKeyboard.InputChecks;
 
 namespace VirtualKeyboard
@@ -8,10 +10,10 @@ namespace VirtualKeyboard
     /// <summary>
     /// Interaction logic for VirtualKeyboardTextBoxControl.xaml
     /// </summary>
-    public partial class VirtualKeyboardTextBoxControl : UserControl
+    public partial class VirtualKeyboardControl : UserControl
     {
-        public enum CharSetLanguage 
-        { 
+        public enum CharSetLanguage
+        {
             HU,
             EN
         }
@@ -22,45 +24,66 @@ namespace VirtualKeyboard
             Double
         }
 
-        public InputCheckType CurrentInputCheckType { get; set; }
+        public InputCheckType CurrentInputCheckType { get; private set; }
+        public IControlHandler ControlHandler { get; private set; }
 
-        public VirtualKeyboardTextBoxControl()
+        public VirtualKeyboardControl()
         {
             InitializeComponent();
         }
 
         private void EditTextButton_Click(object sender, RoutedEventArgs e)
         {
+            SetControlHandler();
             WpfInputKeyboard dialog = new WpfInputKeyboard(CharSet, CurrentInputCheckType)
             {
                 FieldTitle = Title,
-                Text = Text ?? "",
-                CaretPos = Text != null ? Text.Length : 0,
+                Text = ControlHandler.TextValue ?? "",
+                CaretPos = ControlHandler.TextValue != null ? ControlHandler.TextValue.Length : 0,
             };
-
             if ((bool)dialog.ShowDialog())
             {
-                Text = dialog.Text;
+                ControlHandler.TextValue = dialog.Text;
             }
         }
 
-        #region Text
-        public static readonly DependencyProperty TextProperty = DependencyProperty.Register(nameof(Text),
-                                                                                                  typeof(string),
-                                                                                                  typeof(VirtualKeyboardTextBoxControl),
-                                                                                                  new FrameworkPropertyMetadata("",
-                                                                                                                                  FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-        public string Text
+        private void SetControlHandler()
         {
-            get { return (string)GetValue(TextProperty); }
-            set { SetValue(TextProperty, value); }
+            if (ControlItem is TextBox textBox)
+            {
+                ControlHandler = new TextBoxControlHandler(textBox);
+            }
+            else if (ControlItem is ComboBox comboBox && comboBox.IsEditable)
+            {
+                ControlHandler = new ComboBoxControlHandler(comboBox);
+            }
+            else if (ControlItem is NumericUpDown numericUpDown)
+            {
+                ControlHandler = new NumericUpDownControlHandler(numericUpDown);
+            }
+            else
+            {
+                throw new Exception("ControlItem dependency property needs to be either TextBox, NumericUpDown or editable ComboBox!");
+            }
+        }
+        
+        #region ControlItem
+        public static readonly DependencyProperty ControlProperty = DependencyProperty.Register(nameof(ControlItem),
+                                                                                                  typeof(Control),
+                                                                                                  typeof(VirtualKeyboardControl),
+                                                                                                  new FrameworkPropertyMetadata(null,
+                                                                                                                                  FrameworkPropertyMetadataOptions.None));
+        public Control ControlItem
+        {
+            get { return (Control)GetValue(ControlProperty); }
+            set { SetValue(ControlProperty, value); }
         }
         #endregion
 
         #region InputCheck
         public static readonly DependencyProperty InputCheckProperty = DependencyProperty.Register(nameof(InputCheck),
                                                                                                    typeof(InputCheckType),
-                                                                                                   typeof(VirtualKeyboardTextBoxControl),
+                                                                                                   typeof(VirtualKeyboardControl),
                                                                                                    new FrameworkPropertyMetadata(InputCheckType.None,
                                                                                                                           FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                                                                                                                           new PropertyChangedCallback(InputCheckTypeChanged)));
@@ -73,7 +96,7 @@ namespace VirtualKeyboard
 
         private static void InputCheckTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is VirtualKeyboardTextBoxControl control &&
+            if (d is VirtualKeyboardControl control &&
                  e.NewValue is InputCheckType value)
             {
                 control.CurrentInputCheckType = value;
@@ -84,7 +107,7 @@ namespace VirtualKeyboard
         #region Title
         public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(nameof(Title),
                                                                                               typeof(string),
-                                                                                              typeof(VirtualKeyboardTextBoxControl),
+                                                                                              typeof(VirtualKeyboardControl),
                                                                                               new FrameworkPropertyMetadata("",
                                                                                                                           FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
         public string Title
@@ -97,7 +120,7 @@ namespace VirtualKeyboard
         #region CharSet
         public static readonly DependencyProperty CharSetProperty = DependencyProperty.Register(nameof(CharSet),
                                                                                                 typeof(CharSetLanguage),
-                                                                                                typeof(VirtualKeyboardTextBoxControl),
+                                                                                                typeof(VirtualKeyboardControl),
                                                                                                 new FrameworkPropertyMetadata(CharSetLanguage.HU,
                                                                                                                           FrameworkPropertyMetadataOptions.None));
         public CharSetLanguage CharSet

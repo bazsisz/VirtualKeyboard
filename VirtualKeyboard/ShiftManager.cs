@@ -15,6 +15,11 @@ namespace VirtualKeyboard
             set => SetProperty(ref _currentShiftState, ref value);
         }
 
+        public bool IsShiftActive
+        {
+            get => CurrentShiftState == ControlShiftStates.ActiveUntilButtonPressed || CurrentShiftState == ControlShiftStates.AlwaysActive;
+        }
+
         public char ApplyCasing(char character, bool resetFirstLetterUpperCaseToLowerCase)
         {
             switch (_currentShiftState)
@@ -29,6 +34,13 @@ namespace VirtualKeyboard
                 default:
                     return char.ToUpper(character);
             }
+        }
+
+        public bool IsShiftActiveButtonPressed()
+        {
+            bool isActive = IsShiftActive;
+            CurrentShiftState = CurrentShiftState == ControlShiftStates.ActiveUntilButtonPressed ? ControlShiftStates.NotActive : CurrentShiftState;
+            return isActive;
         }
     }
 }

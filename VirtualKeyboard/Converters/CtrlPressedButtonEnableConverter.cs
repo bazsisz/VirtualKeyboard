@@ -20,9 +20,7 @@ namespace VirtualKeyboard.Converters
                     if (str == "a" ||
                         str == "c" ||
                         str == "x" ||
-                        str == "v" ||
-                        str == "<" ||
-                        str == ">")
+                        str == "v")
                     {
                         return true;
                     }

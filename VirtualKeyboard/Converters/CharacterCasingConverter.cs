@@ -14,7 +14,7 @@ namespace VirtualKeyboard.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (targetType == typeof(object) &&
+            if (targetType == typeof(string) &&
                values.Length == 2 &&
                (values[0] is char character) &&
                (values[1] is ShiftManager shiftManager))

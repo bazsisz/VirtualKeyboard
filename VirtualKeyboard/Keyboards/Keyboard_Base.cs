@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VirtualKeyboard
 {
-    abstract class Keyboard_Base
+    public abstract class Keyboard_Base
     {
         public KeySet Alphabet { get; set; }
         public KeySet SpeacialCharacters { get; set; }
